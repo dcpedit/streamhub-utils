@@ -1,7 +1,6 @@
 define(function(require) {
 var Backbone = require('backbone'),
     Mustache = require('mustache'),
-    isotope = require('isotope'),
     ContentView = require('streamhub-backbone/views/ContentView'),
     sources = require('streamhub-backbone/const/sources'),
     QueueProcessor = require('QueueProcessor'),
@@ -12,9 +11,9 @@ var ListView = Backbone.View.extend({
 
     initialize: function (opts) {
         var self = this;
+        self.opts = opts || {};
         this._contentViewOpts = opts.contentViewOptions || {};
         this._sourceOpts = opts.sources || {};
-        this._onAdd = opts.onAdd;
         this.maxLoads = opts.maxLoads;
         this.init = $.Deferred();
         this.$el.addClass(this.className);
@@ -22,10 +21,6 @@ var ListView = Backbone.View.extend({
 
         this.addQueue = new QueueProcessor(this.processItems, this);
         this.streamCtrl = new StreamController();
-
-        if (opts.onDemand) {
-          this.addQueue.pause();
-        }
 
         // Handle single collection mode
         if (this.collection) {
@@ -46,7 +41,8 @@ var ListView = Backbone.View.extend({
       var opts = collection._sdkCollection.opts;
       item.set('articleId', opts.articleId);
       item.set('siteId', opts.siteId);
-      item.set('collection', collection); // points back to orig collection
+      // TODO: change to event to prevent json recursion
+      item.on('remove:item', function() {collection.remove(item)}); // points back to orig collection
       lib.addQueue.push(item);
     },
 
@@ -66,44 +62,45 @@ var ListView = Backbone.View.extend({
     },
 
     processItems: function(list) {
-      //this.addQueue.pause();
+      var el, self = this, items = [], item;
+
       if (typeof list == "number") {
-        this.displayCount.html(list);
+        if (self.opts.onChange) {
+          self.opts.onChange(list);
+        }
         return;
       }
-      var el, self = this, items = $(), item;
+      if (self.opts.reverse) {
+        list.reverse();
+      }
       for (var i = 0; i < list.length; i++) {
         item = list[i];
         if (el = this._insertItem(item)) {
-          items = items.add(el);
+          items.push(el);
         }
         // TODO: Test memory usage
-        // item.get('collection').remove(item);
+        item.trigger('remove:item');
       }
 
-      if (self._onAdd) {
-        self._onAdd(items);
+      if (self.opts.onAdd) {
+        self.opts.onAdd(items);
       }
       else {
         self.$el.prepend(items);
       }
+      if (self.opts.onChange) {
+        self.opts.onChange(0, list.length);
+      }
     },
 
-    filter: function(css) {
-      var self = this;
-      this.init.done(function() {
-        self.$el.isotope({filter: css});
-      });
+    pause: function() {
+      this.addQueue.pause();
+    },
+
+    resume: function() {
+      this.addQueue.resume();
     }
 });
-
-ListView.prototype.getElementByContentId = function (contentId) {
-    var $elements = this.$el.find('*[data-hub-contentid="'+contentId+'"]');
-    if ($elements.length===0) {
-        return false;
-    }
-    return $elements;
-};
 
 ListView.prototype._insertItem = function (item) {
     var self = this,
@@ -112,11 +109,7 @@ ListView.prototype._insertItem = function (item) {
     
     if (!json.author) {
         // TODO: These may be deletes... handle them.
-        // console.log("DefaultView: No author for Content, skipping");
         return;
-    }
-    if (self.getElementByContentId(item.get('id'))) {
-      return;
     }
 
     function _getContentViewOpts (content) {
@@ -141,11 +134,11 @@ ListView.prototype._insertItem = function (item) {
     }, _getContentViewOpts(item)));
 
     newItem
+      .data('json', json)
       .addClass('hub-item ' + item.get('articleId'))
       .attr('data-hub-createdAt', json.createdAt)
       .attr('data-hub-contentId', json.id);
 
-    //this.$el.isotope('insert', newItem);
     return newItem;
 };
 

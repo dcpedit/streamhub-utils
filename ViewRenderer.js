@@ -4,22 +4,28 @@ var Backbone = require('backbone'),
 
 var Renderer = Backbone.Model.extend({
 
+  compiled: null,
+
   initialize: function (template, opts) {
     this.opts = opts || {};
-    this.compiled = Mustache.compile(template);
+    if (typeof template == 'function') {
+      this.compiled = template;
+    }
+    if (typeof template == 'string') {
+      this.compiled = Mustache.compile(template);
+    }
   },
 
-  html: function(data) {
-    var opts = this.opts;
-
+  normalize: function (data) {
     if (data.authorId.match(/twitter\.com$/)) {
       data.author.twitterUserId = data.author.id.split(/@/).shift();
+      if (data.author.avatar) {
+        data.author.avatar = data.author.avatar.replace(/_normal\./, '_bigger.');
+      }
       data.tweetId = data.id.match(/\d+/).pop();
       data.twitterUser = data.author.profileUrl.split(/\/#!\//).pop();
+      data.author.screenName = decodeURIComponent(data.twitterUser);
       data.itemClass = "item-twitter";
-      //if (opts.width && data.attachments && data.attachments.html) {
-      //  data.attachments.html = this.resize(data.attachments.html, opts.width);
-      //}
     }
     else if (data.authorId.match(/instagram\.com$/)) {
       data.itemClass = "item-instagram";
@@ -27,15 +33,11 @@ var Renderer = Backbone.Model.extend({
         delete data.bodyHtml;
       }
     }
-   
-    if (data.twitterUser) {
-      if (data.twitterUser.match(/^iyanlavanzant$/i)) {
-          data.itemUserClass = "item-user-iyanla";
-      } else if (data.twitterUser.match(/^oprah$/i)) {
-          data.itemUserClass = "item-user-oprah";
-      }
-    }
-     
+    return data;
+  },
+
+  html: function(data) {
+    this.normalize(data);
     return this.compiled(data);
   },
 

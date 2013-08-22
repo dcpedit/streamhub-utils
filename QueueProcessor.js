@@ -1,5 +1,9 @@
 define(function() {
 
+function compare(a, b) {
+  return b.get('event') - a.get('event');
+}
+
 var QueueProcessor = function(processor, ctx) {
   // Private
   var _Q = [], _timer = null;
@@ -15,8 +19,9 @@ var QueueProcessor = function(processor, ctx) {
   function expired() {
     if (!_pause) {
       _timer = null;
+      _Q.sort(compare);
       processor.call(ctx, _Q);
-      //_Q.reset();
+      _Q.splice(0, _Q.length);
     }
     else {
       processor.call(ctx, _Q.length);
