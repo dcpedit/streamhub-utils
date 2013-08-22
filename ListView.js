@@ -16,7 +16,9 @@ var ListView = Backbone.View.extend({
         this._sourceOpts = opts.sources || {};
         this.maxLoads = opts.maxLoads;
         this.init = $.Deferred();
-        this.$el.addClass(this.className);
+        if (this.$el) {
+          this.$el.addClass(this.className);
+        }
         this.$count = opts.countDisplay;
 
         this.addQueue = new QueueProcessor(this.processItems, this);
@@ -73,6 +75,7 @@ var ListView = Backbone.View.extend({
       if (self.opts.reverse) {
         list.reverse();
       }
+
       for (var i = 0; i < list.length; i++) {
         item = list[i];
         if (el = this._insertItem(item)) {
@@ -82,15 +85,10 @@ var ListView = Backbone.View.extend({
         item.trigger('remove:item');
       }
 
-      if (self.opts.onAdd) {
-        self.opts.onAdd(items);
-      }
-      else {
+      if (self.$el) {
         self.$el.prepend(items);
       }
-      if (self.opts.onChange) {
-        self.opts.onChange(0, list.length);
-      }
+      self.trigger('allDataLoaded', items);
     },
 
     pause: function() {
