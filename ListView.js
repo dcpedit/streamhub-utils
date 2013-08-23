@@ -67,9 +67,7 @@ var ListView = Backbone.View.extend({
       var el, self = this, items = [], item;
 
       if (typeof list == "number") {
-        if (self.opts.onChange) {
-          self.opts.onChange(list);
-        }
+        self.trigger('dataChanged', list);
         return;
       }
       if (self.opts.reverse) {
@@ -88,6 +86,7 @@ var ListView = Backbone.View.extend({
       if (self.$el) {
         self.$el.prepend(items);
       }
+      self.trigger('dataChanged', 0, list.length);
       self.trigger('allDataLoaded', items);
     },
 
