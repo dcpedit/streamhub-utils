@@ -1,6 +1,7 @@
 define(function(require) {
 var Backbone = require('backbone'),
     Mustache = require('mustache'),
+    _ = require('underscore'),
     ContentView = require('streamhub-backbone/views/ContentView'),
     sources = require('streamhub-backbone/const/sources'),
     QueueProcessor = require('QueueProcessor'),
@@ -21,7 +22,7 @@ var ListView = Backbone.View.extend({
         }
         this.$count = opts.countDisplay;
 
-        this.addQueue = new QueueProcessor(this.processItems, this);
+        this.addQueue = new QueueProcessor(this.processItems, this, opts.delay);
         this.streamCtrl = new StreamController();
 
         // Handle single collection mode
@@ -43,8 +44,6 @@ var ListView = Backbone.View.extend({
       var opts = collection._sdkCollection.opts;
       item.set('articleId', opts.articleId);
       item.set('siteId', opts.siteId);
-      // TODO: change to event to prevent json recursion
-      item.on('remove:item', function() {collection.remove(item)}); // points back to orig collection
       lib.addQueue.push(item);
     },
 
@@ -79,8 +78,6 @@ var ListView = Backbone.View.extend({
         if (el = this._insertItem(item)) {
           items.push(el);
         }
-        // TODO: Test memory usage
-        item.trigger('remove:item');
       }
 
       if (self.$el) {
@@ -135,6 +132,11 @@ ListView.prototype._insertItem = function (item) {
       .addClass('hub-item ' + item.get('articleId'))
       .attr('data-hub-createdAt', json.createdAt)
       .attr('data-hub-contentId', json.id);
+
+    item.on('change', function() {
+      var prev = newItem.data('json');
+      newItem.data('json', _.extend(prev, item.toJSON()));
+    });
 
     return newItem;
 };

@@ -90,8 +90,6 @@ var IsotopeView = Backbone.View.extend({
         if (el = this._insertItem(item)) {
           items = items.add(el);
         }
-        // TODO: Test memory usage
-        // item.get('collection').remove(item);
       }
 
       this.init.done(function() {

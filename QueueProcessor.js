@@ -4,7 +4,7 @@ function compare(a, b) {
   return b.get('event') - a.get('event');
 }
 
-var QueueProcessor = function(processor, ctx) {
+var QueueProcessor = function(processor, ctx, delay) {
   // Private
   var _Q = [], _timer = null;
   var _pause = false;
@@ -13,7 +13,7 @@ var QueueProcessor = function(processor, ctx) {
     if (_timer) {
       clearTimeout(_timer);
     }
-    _timer = setTimeout(expired, 10);
+    _timer = setTimeout(expired, delay || 50);
   }
 
   function expired() {

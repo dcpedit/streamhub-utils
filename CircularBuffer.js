@@ -96,6 +96,17 @@ var CBuffer = function(size) {
     return _full;
   };
 
+  this.indexOf = function(item) {
+    var arr = this.get();
+    var found = -1;
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i] === item) {
+        found = i;
+      }
+    }
+    return found;
+  };
+
   this.on = function(evName, fn) {
     if (!_events[evName]) _events[evName] = [];
     _events[evName].push(fn);
