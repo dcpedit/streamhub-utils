@@ -2,6 +2,26 @@ define(function(require) {
 var Backbone = require('backbone'),
     Mustache = require('mustache');
 
+function _normalize(data) {
+  if (data.authorId.match(/twitter\.com$/)) {
+    data.author.twitterUserId = data.author.id.split(/@/).shift();
+    if (data.author.avatar) {
+      data.author.avatar = data.author.avatar.replace(/_normal\./, '_bigger.');
+    }
+    data.tweetId = data.id.match(/\d+/).pop();
+    data.twitterUser = data.author.profileUrl.split(/\/#!\//).pop();
+    data.author.screenName = decodeURIComponent(data.twitterUser);
+    data.itemClass = "item-twitter";
+  }
+  else if (data.authorId.match(/instagram\.com$/)) {
+    data.itemClass = "item-instagram";
+    if (data.attachments) {
+      delete data.bodyHtml;
+    }
+  }
+  return data;
+}
+
 var Renderer = Backbone.Model.extend({
 
   compiled: null,
@@ -16,25 +36,7 @@ var Renderer = Backbone.Model.extend({
     }
   },
 
-  normalize: function (data) {
-    if (data.authorId.match(/twitter\.com$/)) {
-      data.author.twitterUserId = data.author.id.split(/@/).shift();
-      if (data.author.avatar) {
-        data.author.avatar = data.author.avatar.replace(/_normal\./, '_bigger.');
-      }
-      data.tweetId = data.id.match(/\d+/).pop();
-      data.twitterUser = data.author.profileUrl.split(/\/#!\//).pop();
-      data.author.screenName = decodeURIComponent(data.twitterUser);
-      data.itemClass = "item-twitter";
-    }
-    else if (data.authorId.match(/instagram\.com$/)) {
-      data.itemClass = "item-instagram";
-      if (data.attachments) {
-        delete data.bodyHtml;
-      }
-    }
-    return data;
-  },
+  normalize: _normalize,
 
   html: function(data) {
     this.normalize(data);
@@ -58,8 +60,10 @@ var Renderer = Backbone.Model.extend({
       html = html.replace(/width=['"]\d+['"]/i, 'width=' + width);
     }
   }
-
 });
+
+// Expose as utility function
+Renderer.normalize = _normalize;
 
 return Renderer;
 });
