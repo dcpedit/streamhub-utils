@@ -55,13 +55,11 @@ function ( Backbone, _, Content) {
         var created = self.all.at(len - 1).get('createdAt');
         if (created > self.newestTime) {
           self.newestTime = created;
-          console.log('Newest:', self.newestTime);
         }
       }
       self.timer = 0;
 
       _.each(self.types, function(type) {
-        console.log(type + 'Paused', !!self[type + 'Paused']);
         if (type !== 'all' && self[type + 'Paused']) {
           self.trigger('count:' +type, self[type].length);
         }
