@@ -12,7 +12,7 @@ function ( Backbone, _, Content) {
   });
 
   var Queue = Backbone.Model.extend({
-    oldestTime: 9999999999999,
+    oldestTime: null,
     timer: 0,
     loadCount: 0,
     types: ['newer', 'older', 'all'],
@@ -27,7 +27,7 @@ function ( Backbone, _, Content) {
     add: function(item) {
       var self = this;
       self.all.add(item);
-      if (item.get('createdAt') > self.oldestTime) {
+      if (!self.oldestTime || item.get('createdAt') > self.oldestTime) {
         self.newer.add(item);
       }
       else {
@@ -53,7 +53,7 @@ function ( Backbone, _, Content) {
 
       if (len) {
         var created = self.all.at(0).get('createdAt');
-        if (created < self.oldestTime) {
+        if (!self.oldestTime || created < self.oldestTime) {
           self.oldestTime = created;
         }
       }
