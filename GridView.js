@@ -4,8 +4,8 @@ var Backbone = require('backbone'),
     isotope = require('isotope'),
     ContentView = require('streamhub-backbone/views/ContentView'),
     sources = require('streamhub-backbone/const/sources'),
-    QueueProcessor = require('QueueProcessor'),
-    StreamController = require('StreamController');
+    QueueProcessor = require('streamhub-utils/QueueProcessor');
+    StreamController = require('streamhub-utils/StreamController');
 
 var IsotopeView = Backbone.View.extend({
 

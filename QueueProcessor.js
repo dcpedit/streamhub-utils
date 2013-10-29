@@ -1,4 +1,4 @@
-define(function() {
+define(function(require) {
 
 function compare(a, b) {
   return b.get('event') - a.get('event');

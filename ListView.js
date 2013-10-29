@@ -4,9 +4,9 @@ var Backbone = require('backbone'),
     _ = require('underscore'),
     ContentView = require('streamhub-backbone/views/ContentView'),
     sources = require('streamhub-backbone/const/sources'),
-    QueueProcessor = require('QueueProcessor'),
-    ContentQueue = require('ContentQueue'),
-    StreamController = require('StreamController'),
+    QueueProcessor = require('streamhub-utils/QueueProcessor'),
+    ContentQueue = require('streamhub-utils/ContentQueue'),
+    StreamController = require('streamhub-utils/StreamController'),
     $ = require('jquery');
 
 var ListView = Backbone.View.extend({

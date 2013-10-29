@@ -1,9 +1,7 @@
-define([
-  'backbone',
-  'underscore',
-  'streamhub-backbone/models/Content'
-],
-function ( Backbone, _, Content) {
+define(function(require) {
+  var Backbone = require('backbone'),
+      Content = require('streamhub-backbone/models/Content')
+
   var QueueCollection = Backbone.Collection.extend({
     model: Content,
     comparator: function (item) {
