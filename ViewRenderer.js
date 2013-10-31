@@ -12,7 +12,7 @@ function calculateHeight() {
   return function(text, render) {
     var r = this.height / this.width;
     var h = parseInt(text || 0);
-    return h ? (Math.ceil(h*r)  + 'px') : 'auto';
+    return h ? (Math.round(h*r)  + 'px') : 'auto';
   };
 }
 
